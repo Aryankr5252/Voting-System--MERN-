@@ -33,6 +33,7 @@ router.post('/cast', protect, async (req, res) => {
     await candidate.save();
 
     user.hasVoted = true;
+    user.votedFor = candidateId;
     await user.save();
 
     res.json({ msg: `Vote casted successfully for ${candidate.name}` });

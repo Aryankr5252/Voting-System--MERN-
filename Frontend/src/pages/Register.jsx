@@ -1,8 +1,11 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { registerUser } from '../services/auth';
+import { useAuth } from '../context/AuthContext'; // ✅ STEP 1: Import context
 
 const Register = () => {
+  const { setAuth } = useAuth(); // ✅ STEP 2: use setAuth from context
+
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -14,8 +17,17 @@ const Register = () => {
     try {
       const data = await registerUser(name, email, password);
       localStorage.setItem('token', data.token); // ✅ Save token
+
+      // ✅ STEP 3: Decode token & set auth context
+      const payload = JSON.parse(atob(data.token.split('.')[1]));
+      setAuth({
+        isLoggedIn: true,
+        isAdmin: payload.isAdmin,
+        token: data.token,
+      });
+
       setMsg('Registration successful!');
-      navigate('/'); // ✅ Redirect to homepage
+      navigate('/'); // ✅ Redirect
     } catch (error) {
       setMsg(error.response?.data?.msg || 'Signup failed');
     }

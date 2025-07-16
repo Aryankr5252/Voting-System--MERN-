@@ -1,24 +1,37 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { loginUser } from '../services/auth';
+import { useAuth } from '../context/AuthContext';
 
 const Login = () => {
+  const { setAuth } = useAuth();
+
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [msg, setMsg] = useState('');
   const navigate = useNavigate();
 
   const handleLogin = async (e) => {
-    e.preventDefault();
-    try {
-      const data = await loginUser(email, password);
-      localStorage.setItem('token', data.token); // ✅ Save token
-      setMsg('Login successful!');
-      navigate('/'); // ✅ Redirect
-    } catch (error) {
-      setMsg(error.response?.data?.msg || 'Login failed');
-    }
-  };
+  e.preventDefault();
+  try {
+    const data = await loginUser(email, password);
+    localStorage.setItem('token', data.token); // ✅ Save token
+
+    // ✅ Decode token and update context
+    const payload = JSON.parse(atob(data.token.split('.')[1]));
+    setAuth({
+      isLoggedIn: true,
+      isAdmin: payload.isAdmin,
+      token: data.token,
+    });
+
+    setMsg('Login successful!');
+    navigate('/');
+  } catch (error) {
+    setMsg(error.response?.data?.msg || 'Login failed');
+  }
+};
+
 
   return (
     <div className="max-w-md mx-auto mt-10 bg-white p-6 rounded shadow">

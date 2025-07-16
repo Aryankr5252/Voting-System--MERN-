@@ -84,7 +84,10 @@ router.post('/login', async (req, res) => {
 
 router.get('/profile', verifyToken, async (req, res) => {
   const user = await User.findById(req.user.id).select('-password');
-  res.json(user);
+  res.json({
+    hasVoted: user.hasVoted,
+    votedFor: user.votedFor, 
+  });
 });
 
 
