@@ -9,6 +9,7 @@ const AdminPanel = () => {
   const [party, setParty] = useState('');
   const [candidates, setCandidates] = useState([]);
   const [msg, setMsg] = useState('');
+  const [endDate, setEndDate] = useState('');
   const navigate = useNavigate();
 
   const token = localStorage.getItem('token');
@@ -90,6 +91,21 @@ const AdminPanel = () => {
   };
 
 
+  const handleSetElection = async () => {
+    try {
+      const res = await api.post(
+        '/admin/election',
+        { endDate },
+        { headers: { Authorization: token } }
+      );
+      setMsg(res.data.msg);
+    } catch (err) {
+      setMsg(err.response?.data?.msg || 'Failed to set time');
+    }
+  };
+
+
+
   return (
     <div className="max-w-3xl mx-auto mt-8">
       <h2 className="text-2xl font-bold mb-4">Admin Panel</h2>
@@ -120,6 +136,20 @@ const AdminPanel = () => {
         </button>
 
       </form>
+      <div className="my-4 p-4 bg-gray-100 rounded">
+        <h3 className="font-semibold mb-2">Set Voting End Time</h3>
+        <input
+          type="datetime-local"
+          className="p-2 border rounded mr-2"
+          onChange={(e) => setEndDate(e.target.value)}
+        />
+        <button
+          onClick={handleSetElection}
+          className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
+        >
+          Save Time
+        </button>
+      </div>
 
       <h3 className="text-xl font-semibold mb-2">Voting Results</h3>
       <div className="space-y-2">

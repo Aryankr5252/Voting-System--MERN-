@@ -2,6 +2,7 @@ import express from 'express';
 import Candidate from '../models/Candidate.js';
 import User from '../models/User.js';
 import { protect } from '../middleware/authMiddleware.js';
+import { checkElectionStatus } from '../middleware/checkElectionStatus.js';
 
 const router = express.Router();
 
@@ -50,6 +51,11 @@ router.get('/results', async (req, res) => {
     res.status(500).json({ msg: 'Failed to fetch results' });
   }
 });
+
+router.post('/vote/:id', protect, checkElectionStatus, async (req, res) => {
+  // ✅ your vote logic here
+});
+
 
 
 export default router;

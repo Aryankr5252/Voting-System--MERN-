@@ -7,9 +7,20 @@ const Vote = () => {
   const [hasVoted, setHasVoted] = useState(false);
   const [message, setMessage] = useState('');
   const [votedCandidateId, setVotedCandidateId] = useState(null);
+  const [votingActive, setVotingActive] = useState(false);
+  const [votingEnded, setVotingEnded] = useState(false);
   const navigate = useNavigate();
 
   const token = localStorage.getItem('token');
+
+  useEffect(() => {
+    const checkStatus = async () => {
+      const res = await api.get('/election/status');
+      setVotingEnded(res.data.ended);
+    };
+    checkStatus();
+  }, []);
+
 
   const fetchUser = async () => {
     try {
@@ -60,6 +71,15 @@ const Vote = () => {
     }
   };
 
+  useEffect(() => {
+    const checkStatus = async () => {
+      const res = await api.get('/election/status');
+      setVotingActive(res.data.isActive);
+    };
+    checkStatus();
+  }, []);
+
+
 
   return (
     <div className="max-w-3xl mx-auto mt-8">
@@ -68,36 +88,36 @@ const Vote = () => {
 
       <div className="grid gap-4">
         {candidates.map((candidate) => {
-  const isVotedForThis = candidate._id === votedCandidateId;
+          const isVotedForThis = candidate._id === votedCandidateId;
 
-  return (
-    <div
-      key={candidate._id}
-      className={`border p-4 rounded shadow flex justify-between items-center ${
-        isVotedForThis ? 'bg-green-100 border-green-400 shadow-lg shadow-green-200' : ''
-      }`}
-    >
-      <div>
-        <h3 className="text-xl font-semibold">{candidate.name}</h3>
-        <p className="text-gray-600">Party: {candidate.party}</p>
-        <p className="text-sm text-gray-400">Votes: {candidate.voteCount}</p>
-      </div>
+          return (
+            <div
+              key={candidate._id}
+              className={`border p-4 rounded shadow flex justify-between items-center ${isVotedForThis ? 'bg-green-100 border-green-400 shadow-lg shadow-green-200' : ''
+                }`}
+            >
+              <div>
+                <h3 className="text-xl font-semibold">{candidate.name}</h3>
+                <p className="text-gray-600">Party: {candidate.party}</p>
+                <p className="text-sm text-gray-400">Votes: {candidate.voteCount}</p>
+              </div>
 
-      {hasVoted ? (
-        isVotedForThis ? (
-          <span className="text-green-700 font-semibold">Voted ✅</span>
-        ) : null
-      ) : (
-        <button
-          onClick={() => handleVote(candidate._id)}
-          className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700"
-        >
-          Vote
-        </button>
-      )}
-    </div>
-  );
-})}
+              {hasVoted ? (
+                isVotedForThis ? (
+                  <span className="text-green-700 font-semibold">Voted ✅</span>
+                ) : null
+              ) : (
+                <button
+                  onClick={() => handleVote(candidate._id)}
+                  className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700"
+                  disabled={votingEnded || hasVoted}
+                >
+                  Vote
+                </button>
+              )}
+            </div>
+          );
+        })}
       </div>
     </div>
   );
