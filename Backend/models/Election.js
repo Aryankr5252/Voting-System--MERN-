@@ -2,11 +2,15 @@
 import mongoose from 'mongoose';
 
 const electionSchema = new mongoose.Schema({
-  endDate: Date,
+  endDate: {
+    type: Date,
+    required: true,
+  },
   isEnded: {
     type: Boolean,
     default: false,
   },
 });
 
-export default mongoose.model('Election', electionSchema);
+const Election = mongoose.model('Election', electionSchema);
+export default Election;

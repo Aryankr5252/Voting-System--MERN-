@@ -56,6 +56,19 @@ router.post('/vote/:id', protect, checkElectionStatus, async (req, res) => {
   // ✅ your vote logic here
 });
 
+router.get('/election-status', async (req, res) => {
+  try {
+    const election = await Election.findOne();
+
+    const now = new Date();
+    const isEnded = !election || election.isEnded || new Date(election.endDate) <= now;
+
+    res.json({ isEnded });
+  } catch (err) {
+    res.status(500).json({ msg: 'Error fetching election status' });
+  }
+});
+
 
 
 export default router;

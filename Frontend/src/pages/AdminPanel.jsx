@@ -29,6 +29,18 @@ const AdminPanel = () => {
     fetchResults();
   }, []);
 
+  const handleEndElection = async () => {
+    try {
+      const res = await api.post('/admin/end', {}, {
+        headers: { Authorization: token }
+      });
+      setMsg(res.data.msg || 'Election ended');
+    } catch (err) {
+      setMsg(err.response?.data?.msg || 'Failed to end election');
+    }
+  };
+
+
   const handleDeleteAll = async () => {
     try {
       const res = await api.delete('/admin/delete-candidates', {
@@ -149,6 +161,15 @@ const AdminPanel = () => {
         >
           Save Time
         </button>
+      </div>
+      <div>
+        <button
+          onClick={handleEndElection}
+          className="mt-2 bg-yellow-600 text-white px-4 py-2 rounded hover:bg-yellow-700"
+        >
+          End Election Now
+        </button>
+
       </div>
 
       <h3 className="text-xl font-semibold mb-2">Voting Results</h3>
