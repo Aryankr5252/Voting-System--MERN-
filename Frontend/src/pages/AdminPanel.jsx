@@ -172,7 +172,7 @@ const AdminPanel = () => {
 
       </div>
 
-      <h3 className="text-xl font-semibold mb-2">Voting Results</h3>
+      <h3 className="text-xl font-semibold mb-2 mt-3">Voting Results</h3>
       <div className="space-y-2">
         {candidates.map((c) => (
           <div

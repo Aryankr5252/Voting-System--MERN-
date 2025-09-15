@@ -4,7 +4,8 @@ import ResultsChart from '../components/ResultsChart';
 
 const Results = () => {
   const [candidates, setCandidates] = useState([]);
-  const [winner, setWinner] = useState(null);
+  const [winners, setWinners] = useState([]);   // winner → winners
+  const [winnerStatus, setWinnerStatus] = useState(""); // "winner" | "draw" | ""
   const [showWinner, setShowWinner] = useState(false);
 
   useEffect(() => {
@@ -13,8 +14,14 @@ const Results = () => {
       setShowWinner(res.data.ended);
       if (res.data.ended) {
         const winnerRes = await api.get('/admin/winner');
-        setWinner(winnerRes.data);
+        setWinnerStatus(winnerRes.data.status);
+        if (winnerRes.data.status === "winner") {
+          setWinners([winnerRes.data.winner]);   // ✅ ek ko bhi array me daal do
+        } else if (winnerRes.data.status === "draw") {
+          setWinners(winnerRes.data.winners);    // ✅ already array hai
+        }
       }
+
     };
     checkElectionStatus();
   }, []);
@@ -40,12 +47,30 @@ const Results = () => {
         <p className="text-gray-500">No votes cast yet or loading...</p>
       )}
 
-      {showWinner && winner && (
+      {showWinner && winners.length > 0 && (
         <div className="p-4 my-4 bg-green-100 border border-green-400 rounded">
-          <h3 className="text-xl font-bold text-green-700">🏆 Winner: {winner.name} ({winner.party})</h3>
-          <p className="text-green-600">Total Votes: {winner.voteCount}</p>
+          {winnerStatus === "winner" ? (
+            <>
+              <h3 className="text-xl font-bold text-green-700">
+                🏆 Winner: {winners[0].name} ({winners[0].party})
+              </h3>
+              <p className="text-green-600">Total Votes: {winners[0].voteCount}</p>
+            </>
+          ) : (
+            <>
+              <h3 className="text-xl font-bold text-yellow-700">⚖️ It's a Draw!</h3>
+              <ul className="list-disc ml-6 text-yellow-600">
+                {winners.map((w, i) => (
+                  <li key={i}>
+                    {w.name} ({w.party}) — {w.voteCount} votes
+                  </li>
+                ))}
+              </ul>
+            </>
+          )}
         </div>
       )}
+
     </div>
   );
 };

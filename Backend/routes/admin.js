@@ -58,7 +58,7 @@ router.get('/election-status', async (req, res) => {
   }
 });
 
-// ✅ Winner (Only after election ends)
+// ✅ Winner (Handles Draws Also)
 router.get('/winner', async (req, res) => {
   try {
     const election = await Election.findOne();
@@ -68,12 +68,30 @@ router.get('/winner', async (req, res) => {
     const ended = election.isEnded || now > new Date(election.endDate);
     if (!ended) return res.status(403).json({ msg: 'Voting still ongoing' });
 
-    const winner = await Candidate.findOne().sort({ voteCount: -1 });
-    res.json(winner);
+    // Fetch all candidates
+    const candidates = await Candidate.find().sort({ voteCount: -1 });
+
+    if (!candidates.length) return res.status(404).json({ msg: 'No candidates found' });
+
+    // Find the max vote count
+    const maxVotes = candidates[0].voteCount;
+
+    // Filter all candidates with maxVotes
+    const winners = candidates.filter(c => c.voteCount === maxVotes);
+
+    if (winners.length === 1) {
+      // ✅ Single Winner
+      return res.json({ status: "winner", winner: winners[0] });
+    } else {
+      // ✅ Draw
+      return res.json({ status: "draw", winners });
+    }
   } catch (err) {
+    console.error(err);
     res.status(500).json({ msg: 'Error fetching winner' });
   }
 });
+
 
 // ✅ Set Election with end time
 router.post('/election', verifyToken, async (req, res) => {
